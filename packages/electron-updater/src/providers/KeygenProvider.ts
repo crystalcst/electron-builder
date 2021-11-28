@@ -38,7 +38,7 @@ export class KeygenProvider extends Provider<UpdateInfo> {
   }
 
   resolveFiles(updateInfo: UpdateInfo): Array<ResolvedUpdateFileInfo> {
-    return resolveFiles(updateInfo, this.baseUrl)
+    return resolveFiles(updateInfo, this.baseUrl, this.runtimeOptions)
   }
 
   toString() {

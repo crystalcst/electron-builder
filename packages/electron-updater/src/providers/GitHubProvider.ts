@@ -130,7 +130,7 @@ export class GitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
 
   resolveFiles(updateInfo: GithubUpdateInfo): Array<ResolvedUpdateFileInfo> {
     // still replace space to - due to backward compatibility
-    return resolveFiles(updateInfo, this.baseUrl, p => this.getBaseDownloadPath(updateInfo.tag, p.replace(/ /g, "-")))
+    return resolveFiles(updateInfo, this.baseUrl, this.runtimeOptions, p => this.getBaseDownloadPath(updateInfo.tag, p.replace(/ /g, "-")))
   }
 
   private getBaseDownloadPath(tag: string, fileName: string): string {

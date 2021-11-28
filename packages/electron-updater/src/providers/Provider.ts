@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { CancellationToken, configureRequestUrl, newError, safeStringifyJson, UpdateFileInfo, UpdateInfo, WindowsUpdateInfo } from "builder-util-runtime"
 import { OutgoingHttpHeaders, RequestOptions } from "http"
 import { load } from "js-yaml"
@@ -7,19 +8,23 @@ import { ResolvedUpdateFileInfo } from "../main"
 import { newUrlFromBase } from "../util"
 
 export type ProviderPlatform = "darwin" | "linux" | "win32"
-
+export declare interface TencentCosUrls {
+  name: string
+  url: string
+}
 export interface ProviderRuntimeOptions {
   isUseMultipleRangeRequest: boolean
   platform: ProviderPlatform
-
   executor: ElectronHttpExecutor
+  isTencentCos?: boolean
+  tencentCosUrls?: Array<TencentCosUrls>
 }
 
 export abstract class Provider<T extends UpdateInfo> {
   private requestHeaders: OutgoingHttpHeaders | null = null
   protected readonly executor: ElectronHttpExecutor
 
-  protected constructor(private readonly runtimeOptions: ProviderRuntimeOptions) {
+  protected constructor(readonly runtimeOptions: ProviderRuntimeOptions) {
     this.executor = runtimeOptions.executor
   }
 
@@ -133,14 +138,22 @@ export function getFileList(updateInfo: UpdateInfo): Array<UpdateFileInfo> {
   }
 }
 
-export function resolveFiles(updateInfo: UpdateInfo, baseUrl: URL, pathTransformer: (p: string) => string = (p: string): string => p): Array<ResolvedUpdateFileInfo> {
+export function resolveFiles(
+  updateInfo: UpdateInfo,
+  baseUrl: URL,
+  runtimeOptions?: ProviderRuntimeOptions,
+  pathTransformer: (p: string) => string = (p: string): string => p
+): Array<ResolvedUpdateFileInfo> {
   const files = getFileList(updateInfo)
   const result: Array<ResolvedUpdateFileInfo> = files.map(fileInfo => {
     if ((fileInfo as any).sha2 == null && fileInfo.sha512 == null) {
       throw newError(`Update info doesn't contain nor sha256 neither sha512 checksum: ${safeStringifyJson(fileInfo)}`, "ERR_UPDATER_NO_CHECKSUM")
     }
+    const extension = fileInfo.url.split(".")[1]
+    const extensionUrl = `${extension}Url`
+    const url = newUrlFromBase(pathTransformer(fileInfo.url), baseUrl, false, runtimeOptions, extensionUrl)
     return {
-      url: newUrlFromBase(pathTransformer(fileInfo.url), baseUrl),
+      url,
       info: fileInfo,
     }
   })

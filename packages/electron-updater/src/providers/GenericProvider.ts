@@ -2,12 +2,15 @@ import { GenericServerOptions, HttpError, newError, UpdateInfo } from "builder-u
 import { AppUpdater } from "../AppUpdater"
 import { ResolvedUpdateFileInfo } from "../main"
 import { getChannelFilename, newBaseUrl, newUrlFromBase } from "../util"
-import { parseUpdateInfo, Provider, ProviderRuntimeOptions, resolveFiles } from "./Provider"
-
+import { parseUpdateInfo, Provider, ProviderRuntimeOptions, resolveFiles, TencentCosUrls } from "./Provider"
+export interface GenericTencentOsOptions extends GenericServerOptions {
+  urls?: Array<TencentCosUrls>
+}
 export class GenericProvider extends Provider<UpdateInfo> {
-  private readonly baseUrl = newBaseUrl(this.configuration.url)
+  // @ts-ignore
+  private readonly baseUrl = this.runtimeOptions.isTencentCos ? newBaseUrl(this.runtimeOptions.tencentCosUrls[0].url) : newBaseUrl(this.configuration.url)
 
-  constructor(private readonly configuration: GenericServerOptions, private readonly updater: AppUpdater, runtimeOptions: ProviderRuntimeOptions) {
+  constructor(private readonly configuration: GenericTencentOsOptions, private readonly updater: AppUpdater, runtimeOptions: ProviderRuntimeOptions) {
     super(runtimeOptions)
   }
 
@@ -18,7 +21,7 @@ export class GenericProvider extends Provider<UpdateInfo> {
 
   async getLatestVersion(): Promise<UpdateInfo> {
     const channelFile = getChannelFilename(this.channel)
-    const channelUrl = newUrlFromBase(channelFile, this.baseUrl, this.updater.isAddNoCacheQuery)
+    const channelUrl = newUrlFromBase(channelFile, this.baseUrl, this.updater.isAddNoCacheQuery, this.runtimeOptions, "channelUrl")
     for (let attemptNumber = 0; ; attemptNumber++) {
       try {
         return parseUpdateInfo(await this.httpRequest(channelUrl), channelFile, channelUrl)
@@ -43,6 +46,6 @@ export class GenericProvider extends Provider<UpdateInfo> {
   }
 
   resolveFiles(updateInfo: UpdateInfo): Array<ResolvedUpdateFileInfo> {
-    return resolveFiles(updateInfo, this.baseUrl)
+    return resolveFiles(updateInfo, this.baseUrl, this.runtimeOptions)
   }
 }

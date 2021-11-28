@@ -2,6 +2,7 @@
 import { URL } from "url"
 // @ts-ignore
 import * as escapeRegExp from "lodash.escaperegexp"
+import { TencentCosUrls } from "./providers/Provider"
 
 /** @internal */
 export function newBaseUrl(url: string): URL {
@@ -14,8 +15,24 @@ export function newBaseUrl(url: string): URL {
 
 // addRandomQueryToAvoidCaching is false by default because in most cases URL already contains version number,
 // so, it makes sense only for Generic Provider for channel files
-export function newUrlFromBase(pathname: string, baseUrl: URL, addRandomQueryToAvoidCaching = false): URL {
-  const result = new URL(pathname, baseUrl)
+export function newUrlFromBase(
+  pathname: string,
+  baseUrl: URL,
+  addRandomQueryToAvoidCaching = false,
+  runtimeOptions: {
+    isTencentCos?: boolean | undefined
+    tencentCosUrls?: Array<TencentCosUrls> | undefined
+  } = { isTencentCos: false, tencentCosUrls: [] },
+  target = "channelUrl"
+): URL {
+  const { isTencentCos, tencentCosUrls } = runtimeOptions
+  let result = new URL(pathname, baseUrl)
+  if (isTencentCos) {
+    pathname = ""
+    // @ts-ignore
+    const url = tencentCosUrls?.filter(item => item.name == target)[0].url
+    result = baseUrl = new URL(url as string)
+  }
   // search is not propagated (search is an empty string if not specified)
   const search = baseUrl.search
   if (search != null && search.length !== 0) {

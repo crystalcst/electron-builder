@@ -14,7 +14,7 @@ import {
 import { AppUpdater } from "./AppUpdater"
 import { BintrayProvider } from "./providers/BintrayProvider"
 import { BitbucketProvider } from "./providers/BitbucketProvider"
-import { GenericProvider } from "./providers/GenericProvider"
+import { GenericProvider, GenericTencentOsOptions } from './providers/GenericProvider';
 import { GitHubProvider } from "./providers/GitHubProvider"
 import { KeygenProvider } from "./providers/KeygenProvider"
 import { PrivateGitHubProvider } from "./providers/PrivateGitHubProvider"
@@ -71,6 +71,15 @@ export function createClient(data: PublishConfiguration | AllPublishOptions, upd
         isUseMultipleRangeRequest: options.useMultipleRangeRequest !== false && isUrlProbablySupportMultiRangeRequests(options.url),
       })
     }
+
+    case "generic-tencent-cos": {
+      const options = data as GenericTencentOsOptions
+      return new GenericProvider(options, updater, {
+        ...runtimeOptions,
+        isTencentCos: true,
+        tencentCosUrls: options.urls,
+      })
+  }
 
     case "bintray":
       return new BintrayProvider(data as BintrayOptions, runtimeOptions)
