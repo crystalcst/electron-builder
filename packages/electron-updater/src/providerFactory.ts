@@ -14,7 +14,7 @@ import {
 import { AppUpdater } from "./AppUpdater"
 import { BintrayProvider } from "./providers/BintrayProvider"
 import { BitbucketProvider } from "./providers/BitbucketProvider"
-import { GenericProvider, GenericTencentOsOptions } from './providers/GenericProvider';
+import { GenericProvider, GenericTencentOsOptions } from "./providers/GenericProvider"
 import { GitHubProvider } from "./providers/GitHubProvider"
 import { KeygenProvider } from "./providers/KeygenProvider"
 import { PrivateGitHubProvider } from "./providers/PrivateGitHubProvider"
@@ -79,7 +79,7 @@ export function createClient(data: PublishConfiguration | AllPublishOptions, upd
         isTencentCos: true,
         tencentCosUrls: options.urls,
       })
-  }
+    }
 
     case "bintray":
       return new BintrayProvider(data as BintrayOptions, runtimeOptions)
