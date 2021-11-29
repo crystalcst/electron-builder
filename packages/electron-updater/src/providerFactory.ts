@@ -20,6 +20,8 @@ import { KeygenProvider } from "./providers/KeygenProvider"
 import { PrivateGitHubProvider } from "./providers/PrivateGitHubProvider"
 import { Provider, ProviderRuntimeOptions } from "./providers/Provider"
 
+type PublishProviderTencentCos = "github" | "bintray" | "s3" | "spaces" | "generic" | "custom" | "snapStore" | "keygen" | "bitbucket" | "generic-tencent-cos"
+
 export function isUrlProbablySupportMultiRangeRequests(url: string): boolean {
   return !url.includes("s3.amazonaws.com")
 }
@@ -30,7 +32,7 @@ export function createClient(data: PublishConfiguration | AllPublishOptions, upd
     throw newError("Please pass PublishConfiguration object", "ERR_UPDATER_INVALID_PROVIDER_CONFIGURATION")
   }
 
-  const provider = data.provider
+  const provider = data.provider as PublishProviderTencentCos
   switch (provider) {
     case "github": {
       const githubOptions = data as GithubOptions
